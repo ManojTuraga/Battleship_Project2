@@ -1,4 +1,4 @@
-boardSize = 10 #make da board 10x10
+boardSize = 10 #make the board 10x10
 letters = "ABCDEFGHIJ" #string that contains column labels
 
 shipSizes = {  # dictionary for ship sizes based on amount
@@ -9,7 +9,7 @@ shipSizes = {  # dictionary for ship sizes based on amount
     5: [1, 2, 3, 4, 5] #ships of size 1, 2, 3, 4, and 5 for 5 ships
 }
 
-def printBoard(board): #prints da board with row and column labels
+def printBoard(board): #prints the board with row and column labels
     print("  " + " ".join(letters)) #print column labels
     for i in range(boardSize): #loop through rows
         row = [str(cell) for cell in board[i]] #convert cells to strings
@@ -29,7 +29,7 @@ def getCoordinatesInput(): #gets coordinates
             return letters.index(col), int(row) - 1 #return indices
         print("Invalid coordinates. Try again.") #if invalid, ask again
 
-def placeShipOnBoard(board, size, shipId): #places a ship on da board
+def placeShipOnBoard(board, size, shipId): #places a ship on the board
     while True: #loop
         col, row = getCoordinatesInput() #get coordinates
         orientation = input("Enter H (Horizontal) or V (Vertical): ").strip().upper()#get orientation
@@ -42,7 +42,7 @@ def placeShipOnBoard(board, size, shipId): #places a ship on da board
                 board[row][col + i] = shipId #place ship horizontally
             
             print("\nCurrent board:")# show board
-            printBoard(board) #print da board
+            printBoard(board) #print the board
             break
         elif orientation == 'V': #vertical placement
             if row + size > boardSize or any(board[row + i][col] != '~' for i in range(size)): #check fit and availability
@@ -52,12 +52,12 @@ def placeShipOnBoard(board, size, shipId): #places a ship on da board
                 board[row + i][col] = shipId #place ship vertically
             
             print("\nCurrent board:")# show board
-            printBoard(board) #print da board
+            printBoard(board) #print the board
             break
         else:
             print("Invalid orientation. Try again.") #if orientation is invalid
 
-def placeShips(board, shipSizes): #places multiple ships on da board
+def placeShips(board, shipSizes): #places multiple ships on the board
     print("\nCurrent board:")
     printBoard(board) # Print the empty board before placing ships
     for i, size in enumerate(shipSizes): #loop through ships
@@ -95,7 +95,7 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard): #handles a pl
             playerTrackingBoard[row][col] = "O" #mark miss
         break #end turn
 
-def setupGame(): #sets up da game
+def setupGame(): #sets up the game
     while True: #loop
         numShips = input("Enter number of ships (1-5): ").strip() #ask for number of ships
         if numShips.isdigit() and 1 <= int(numShips) <= 5: #check if valid input
@@ -123,7 +123,7 @@ def setupGame(): #sets up da game
 def main(): #main
     print("Welcome to Battleship!") #welcome
     
-    playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips = setupGame() #setup da game
+    playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips = setupGame() #setup the game
 
     while True: #game loop
         print("\nPlayer 1's turn.") #player 1's turn
@@ -134,7 +134,7 @@ def main(): #main
         playerTurn(opponentBoard, opponentShips, playerTrackingBoard) #player 1 attacks
         if allShipsSunk(opponentShips): #check if player 2's ships are sunk
             print("Player 1 wins!") #player 1 wins
-            break #stop da loop
+            break #stop the loop
 
         print("\nPlayer 2's turn.") #player 2's turn
         print("Your board")
