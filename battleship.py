@@ -1,3 +1,36 @@
+'''
+Date
+Sept 11, 2024
+
+Program Name
+Battleship.py
+
+Description
+A python program that runs a battleship game.
+
+Inputs
+* Number of ships (int)
+* Ship Coordinates (str)
+* Ship Orientation (str)
+* Attack Coordinates (str)
+
+Outputs
+* Board Display (str)
+* Prompts (str)
+* Feedback on Actions (str)
+* Sunk Ship Announcements (str)
+* Victory Message (str)
+
+Authors / Members
+* Abinav Krishnan
+* Ansh Rajput
+* Liv Sutton
+* Ojas Patil
+* Priyatam Nuney
+
+'''
+
+
 boardSize = 10 #make the board 10x10
 letters = "ABCDEFGHIJ" #string that contains column labels
 
