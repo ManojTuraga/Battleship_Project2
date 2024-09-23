@@ -1,0 +1,33 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+object battleship.py {
+	# Main game logic
+	main();
+	playerTurn();
+}
+
+abstract Bullet {
+	# Size of array containing pattern--should be odd
+	int patternSize;
+	# Pattern with X = Hit, - = Nothing, O = Reveal
+	char[patternSize][patternSize] pattern;
+}
+
+battleship.py <-- Bullet
+
+class GenericBullet {
+	patternSize = 1;
+	pattern[1][1] = ~[["X"]]
+}
+
+Bullet <|-- GenericBullet
+
+class ClusterBomb {
+	patternSize = 3;
+	pattern[3][3] = ~[["-", "X", "-"], ["X", "-", "X"], ["-", "X", "-"]];
+}
+
+Bullet <|-- ClusterBomb
+
+@enduml
