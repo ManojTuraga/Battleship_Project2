@@ -28,7 +28,15 @@ Authors / Members
 * Ojas Patil
 * Priyatam Nuney
 
+Contributers
+* Manoj Turaga
+
 '''
+
+import ai
+import utility
+
+from random import choice
 
 
 boardSize = 10 #make the board 10x10
@@ -51,16 +59,26 @@ def printBoard(board): #prints the board with row and column labels
 def createEmptyBoard(): #creates a blank board
     return [['~'] * boardSize for _ in range(boardSize)] #fill board with waves (~)
 
-def getCoordinatesInput(): #gets coordinates
-    while True: #loop
-        coordinates = input("Enter the coordinates (e.g. A5): ").strip().upper() #get input and format it
-        if len(coordinates) < 2: #check if too short
-            print("Invalid input. Try again.") #print error message
-            continue #continue asking
-        col, row = coordinates[0], coordinates[1:] #split input into column and row
-        if col in letters and row.isdigit() and 1 <= int(row) <= 10: #check if column and row are valid
-            return letters.index(col), int(row) - 1 #return indices
-        print("Invalid coordinates. Try again.") #if invalid, ask again
+def getCoordinatesInput( num_of_players, selected_coordinates = [] ): #gets coordinates
+    if num_of_players == 1:
+        while True:
+            rand_col = choice(list(letters))
+            rand_row = choice(range(1, 11))
+
+            if (rand_col, rand_row) not in selected_coordinates:
+                selected_coordinates.append((rand_col, rand_row))
+                return rand_col, rand_row
+            
+    else:
+        while True: #loop
+            coordinates = input("Enter the coordinates (e.g. A5): ").strip().upper() #get input and format it
+            if len(coordinates) < 2: #check if too short
+                print("Invalid input. Try again.") #print error message
+                continue #continue asking
+            col, row = coordinates[0], coordinates[1:] #split input into column and row
+            if col in letters and row.isdigit() and 1 <= int(row) <= 10: #check if column and row are valid
+                return letters.index(col), int(row) - 1 #return indices
+            print("Invalid coordinates. Try again.") #if invalid, ask again
 
 def placeShipOnBoard(board, size, shipId): #places a ship on the board
     while True: #loop
@@ -118,6 +136,7 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard): #handles a pl
 
         hit, shipId = checkHitOrMiss(opponentBoard, row, col) #check if hit
         if hit:
+            ai.HIT_COORDINATES.append( ( col, row ) )
             print("It's a hit!") #notify hit
             opponentShips[shipId] -= 1 #reduce ship's health
             playerTrackingBoard[row][col] = "X" #mark hit on tracking board
@@ -128,7 +147,7 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard): #handles a pl
             playerTrackingBoard[row][col] = "O" #mark miss
         break #end turn
 
-def setupGame(): #sets up the game
+def setupGame( num_of_players ): #sets up the game
     while True: #loop
         numShips = input("Enter number of ships (1-5): ").strip() #ask for number of ships
         if numShips.isdigit() and 1 <= int(numShips) <= 5: #check if valid input
@@ -142,8 +161,11 @@ def setupGame(): #sets up the game
     print("Player 1, place your ships.") #prompt player 1 to place ships
     placeShips(playerBoard, shipSizes[numShips]) #place player 1's ships
 
-    print("Player 2, place your ships.") #prompt player 2 to place ships
-    placeShips(opponentBoard, shipSizes[numShips]) #place player 2's ships
+    if num_of_players == 1:
+        pass
+    else:
+        print("Player 2, place your ships.") #prompt player 2 to place ships
+        placeShips(opponentBoard, shipSizes[numShips]) #place player 2's ships
 
     playerTrackingBoard = createEmptyBoard() #create tracking board for player 1
     opponentTrackingBoard = createEmptyBoard() #create tracking board for player 2
@@ -154,11 +176,40 @@ def setupGame(): #sets up the game
     return playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips #return setup
 
 def main(): #main
-    print("Welcome to Battleship!") #welcome
-    
-    playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips = setupGame() #setup the game
+    action_function = None
+    ai_difficulty = 0
+    number_of_players = 0
 
-    while True: #game loop
+    while True:
+        print("Welcome to Battleship!") #welcome
+        number_of_players = input("How many players (1 or 2)?: ")
+        
+        if number_of_players.isnumeric() and int(number_of_players) in [1, 2]:
+            number_of_players = int( number_of_players )
+
+            if number_of_players == 1:
+                print("How difficult do you want the AI to be?")
+                print("\t1) Easy: The AI will fire randomly every turn.")
+                print("\t2) Medium: The AI will fire randomly until it hits a ship. Then it fires in orthogonally adjacent spaces to find other hits until a ship is sunk.")
+                print("\t3) Hard: The AI knows where all of your ships are and hits every turn!")
+                
+                ai_difficulty = input("Difficulty (1 - 3): ")
+
+                if ai_difficulty.isnumeric() and int(ai_difficulty) in [1, 2, 3]:
+                    ai_difficulty = int(ai_difficulty)
+                    break
+                else:
+                    print("Invalid AI selection, enter 1, 2, or 3!")
+            break
+
+        else:
+            utility.clear_screen()
+            print( "Error! Invalid number of players. Please enter 1 or 2" )
+    
+    playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips = setupGame( number_of_players ) #setup the game
+
+    while True: #game loop 
+        utility.clear_screen()
         print("\nPlayer 1's turn.") #player 1's turn
         print("Your board")
         printBoard(playerBoard) #show player 1's board
@@ -169,6 +220,7 @@ def main(): #main
             print("Player 1 wins!") #player 1 wins
             break #stop the loop
 
+        utility.clear_screen()
         print("\nPlayer 2's turn.") #player 2's turn
         print("Your board")
         printBoard(opponentBoard) #show player 2's board
