@@ -1,35 +1,3 @@
-'''
-Date
-Sept 11, 2024
-
-Program Name
-Battleship.py
-
-Description
-A python program that runs a battleship game.
-
-Inputs
-* Number of ships (int)
-* Ship Coordinates (str)
-* Ship Orientation (str)
-* Attack Coordinates (str)
-
-Outputs
-* Board Display (str)
-* Prompts (str)
-* Feedback on Actions (str)
-* Sunk Ship Announcements (str)
-* Victory Message (str)
-
-Authors / Members
-* Abinav Krishnan
-* Ansh Rajput
-* Liv Sutton
-* Ojas Patil
-* Priyatam Nuney
-
-'''
-
 
 boardSize = 10 #make the board 10x10
 letters = "ABCDEFGHIJ" #string that contains column labels
@@ -112,20 +80,7 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard): #handles a pl
     while True: #loop until attack
         col, row = getCoordinatesInput() #get attack coordinates
 
-        if playerTrackingBoard[row][col] != '~': #check if already attacked
-            print("You've already fired at this location. Try again.") #already attacked message
-            continue #continue asking
-
-        hit, shipId = checkHitOrMiss(opponentBoard, row, col) #check if hit
-        if hit:
-            print("It's a hit!") #notify hit
-            opponentShips[shipId] -= 1 #reduce ship's health
-            playerTrackingBoard[row][col] = "X" #mark hit on tracking board
-            if opponentShips[shipId] == 0: #if ship sunk
-                print(f"You sunk the opponent's {shipId}!") #notify ship sunk
-        else:
-            print("It's a miss.") #notify miss
-            playerTrackingBoard[row][col] = "O" #mark miss
+        opponentBoard, playerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = test_bullet.shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
         break #end turn
 
 def setupGame(): #sets up the game
