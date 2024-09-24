@@ -3,6 +3,15 @@
 import random
 from battleship import *
 
+def checkHitOrMiss(board, row, col): #checks if an attack is a hit or miss
+    if board[row][col].startswith("S"): #hit detected
+        shipId = board[row][col] #get ship ID
+        board[row][col] = "X" #mark hit
+        return True, shipId #return hit and ship ID
+    board[row][col] = "O" #mark miss
+    return False, None #return miss
+
+
 #this will be used for every bullet that is implemented
 class Bullet:
     def __init__(self, rank= 0, flavor_text = "", hit_pattern = [], name = "Unnamed Bullet"):
@@ -84,7 +93,7 @@ class Bullet:
         #set up some bools
         got_hit = False
         got_sink = False
-        hit_ids = []
+        hit_ids = dict()
         sink_ids = []
         
         #now, we iterate through each character of the hit pattern
@@ -114,7 +123,10 @@ class Bullet:
                     if hit:
                         got_hit = True
                         if ship_id not in hit_ids:
-                            hit_ids.append(ship_id)
+                            if ship_id not in hit_ids.keys():
+                                hit_ids[ ship_id ] = []
+
+                            hit_ids[ ship_id ].append( ( cur_x, cur_y  ) )
                             
                         opponentShips[ship_id] -= 1 
                         knowledge_board[cur_x][cur_y] = "X" #mark hit on tracking board
@@ -124,7 +136,7 @@ class Bullet:
                                 sink_ids.append(ship_id)
                             
                     else:
-                        knowledge_board[cur_y][cur_y] = "O" #mark miss
+                        knowledge_board[cur_y][cur_x] = "O" #mark miss
                 
                 elif hit_pattern[j][i] == "O":
                     #reveal this location
