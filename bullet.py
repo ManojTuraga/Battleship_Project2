@@ -1,6 +1,7 @@
 #this is the implementation of the bullet class for our custom bullets
-#we need random
+#we need random and the main functions
 import random
+from battleship import *
 
 #this will be used for every bullet that is implemented
 class Bullet:
