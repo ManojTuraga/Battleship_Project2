@@ -1,3 +1,4 @@
+from bullet import *
 
 boardSize = 10 #make the board 10x10
 letters = "ABCDEFGHIJ" #string that contains column labels
