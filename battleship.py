@@ -1,3 +1,35 @@
+'''
+Date
+Sept 11, 2024
+
+Program Name
+Battleship.py
+
+Description
+A python program that runs a battleship game.
+
+Inputs
+* Number of ships (int)
+* Ship Coordinates (str)
+* Ship Orientation (str)
+* Attack Coordinates (str)
+
+Outputs
+* Board Display (str)
+* Prompts (str)
+* Feedback on Actions (str)
+* Sunk Ship Announcements (str)
+* Victory Message (str)
+
+Authors / Members
+* Abinav Krishnan
+* Ansh Rajput
+* Liv Sutton
+* Ojas Patil
+* Priyatam Nuney
+
+'''
+import ai
 import os
 import platform 
 from bullet import *
@@ -15,14 +47,17 @@ shipSizes = {  # dictionary for ship sizes based on amount
     5: [1, 2, 3, 4, 5] #ships of size 1, 2, 3, 4, and 5 for 5 ships
 }
 
+
 def printBoard(board): #prints the board with row and column labels
     print("  " + " ".join(letters)) #print column labels
     for i in range(boardSize): #loop through rows
         row = [str(cell) for cell in board[i]] #convert cells to strings
         print(f"{i + 1:2} {' '.join(row)}") #print row number and cells
 
+
 def createEmptyBoard(): #creates a blank board
     return [['~'] * boardSize for _ in range(boardSize)] #fill board with waves (~)
+
 
 def getCoordinatesInput(): #gets coordinates
     while True: #loop
@@ -35,16 +70,22 @@ def getCoordinatesInput(): #gets coordinates
             return letters.index(col), int(row) - 1 #return indices
         print("Invalid coordinates. Try again.") #if invalid, ask again
 
-def placeShipOnBoard(board, size, shipId): #places a ship on the board
+
+def placeShipOnBoard(board, size, shipId, ai_player=False): #places a ship on the board
+        
     while True: #loop
-        col, row = getCoordinatesInput() #get coordinates
-        orientation = input("Enter H (Horizontal) or V (Vertical): ").strip().upper()#get orientation
+        if ai_player:
+            col, row, orientation = ai.generateAICoords(is_setup=True)
+        else:
+            col, row = getCoordinatesInput() #get coordinates
+            orientation = input("Enter H (Horizontal) or V (Vertical): ").strip().upper()#get orientation
 
         if orientation == 'H': #horizontal placement
             if col + size > boardSize or any(board[row][col + i] != '~' for i in range(size)): #check fit and availability
-                print("Invalid placement. Try again.") #invalid placement message
+                if not ai_player: print("Invalid placement. Try again.") #invalid placement message
                 continue #continue asking
             for i in range(size): #loop through board
+                if not ai_player:  ai.OPPONENT_LOCATION.append((row, col+i))
                 board[row][col + i] = shipId #place ship horizontally
             
             print("\nCurrent board:")# show board
@@ -52,41 +93,84 @@ def placeShipOnBoard(board, size, shipId): #places a ship on the board
             break
         elif orientation == 'V': #vertical placement
             if row + size > boardSize or any(board[row + i][col] != '~' for i in range(size)): #check fit and availability
-                print("Invalid placement. Try again.") #invalid placement message
+                if not ai_player: print("Invalid placement. Try again.") #invalid placement message
                 continue #continue asking
             for i in range(size): #loop through board
+                if not ai_player: ai.OPPONENT_LOCATION.append((row+i, col))
                 board[row + i][col] = shipId #place ship vertically
             
             print("\nCurrent board:")# show board
             printBoard(board) #print the board
             break
         else:
-            print("Invalid orientation. Try again.") #if orientation is invalid
+            if not ai_player: print("Invalid orientation. Try again.") #if orientation is invalid
 
-def placeShips(board, shipSizes): #places multiple ships on the board
+
+def placeShips(board, shipSizes, ai_player=False): #places multiple ships on the board
     print("\nCurrent board:")
     printBoard(board) # Print the empty board before placing ships
     for i, size in enumerate(shipSizes): #loop through ships
-        placeShipOnBoard(board, size, f"S{i+1}") #place each ship
+        placeShipOnBoard(board, size, f"S{i+1}", ai_player) #place each ship
 
-def checkHitOrMiss(board, row, col): #checks if an attack is a hit or miss
-    if board[row][col].startswith("S"): #hit detected
-        shipId = board[row][col] #get ship ID
-        board[row][col] = "X" #mark hit
-        return True, shipId #return hit and ship ID
-    board[row][col] = "O" #mark miss
-    return False, None #return miss
 
 def allShipsSunk(shipHits): #checks if all ships are sunk
     return all(hit == 0 for hit in shipHits.values()) #return True if all ships are sunk
 
-def playerTurn(opponentBoard, opponentShips, playerTrackingBoard): #handles a player's turn
+
+def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=False, difficulty=None): #handles a player's turn
     print("Your turn to shoot.") #prompt player's turn
     while True: #loop until attack
-        col, row = getCoordinatesInput() #get attack coordinates
+        
+        if ai_player and difficulty == 1:
+            row, col = ai.generateAICoords()
+            
+        elif ai_player and difficulty == 2:
+            if ai.SHIP_HIT:
+                row, col = ai.STACK.pop()
+                ai.USED_COORDS.add((row, col))
+            else:
+                row, col = ai.generateAICoords()
+                
+        elif ai_player and difficulty == 3:
+            row, col = ai.OPPONENT_LOCATION.pop()
+            
+        else:
+            col, row = getCoordinatesInput() #get attack coordinates
 
-        opponentBoard, playerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = test_bullet.shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
+        if playerTrackingBoard[row][col] != '~': #check if already attacked
+            if not ai_player: print("You've already fired at this location. Try again.") #already attacked message
+            continue #continue asking
+
+        newOpponentBoard, newPlayerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = test_bullet.shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
+
+        for i in range( len( newOpponentBoard ) ):
+            for j in range( len( newOpponentBoard ) ):
+                opponentBoard[ i ][ j ] = newOpponentBoard[ i ][ j ]
+
+        for i in range( len( newPlayerTrackingBoard ) ):
+            for j in range( len( newPlayerTrackingBoard ) ):
+                playerTrackingBoard[ i ][ j ] = newPlayerTrackingBoard[ i ][ j ]
+
+        if got_hit:            
+            print("It's a hit!") #notify hit
+            ai.SHIP_HIT = True
+
+            if ai_player:
+                for ship_hits in hits.values():
+                    for row, col in ship_hits:
+                        ai.stack_directions(row, col)
+            
+            if got_sink: #if ship sunk
+                ai.SHIP_HIT = False
+                ai.STACK = []
+
+                for ship in sinks:
+                    print(f"You sunk the opponent's {ship}!") #notify ship sunk
+        else:
+            print("It's a miss.") #notify miss
+        
         break #end turn
+    
 
 def setupGame(): #sets up the game
     while True: #loop
@@ -95,7 +179,9 @@ def setupGame(): #sets up the game
             numShips = int(numShips) #convert to integer
             break
         print("Invalid number. Try again.") #invalid number message
-
+        
+    ai_player, difficulty = ai.determine_ai_player()
+        
     playerBoard = createEmptyBoard() #create player 1 board
     opponentBoard = createEmptyBoard() #create player 2 board
 
@@ -103,7 +189,7 @@ def setupGame(): #sets up the game
     placeShips(playerBoard, shipSizes[numShips]) #place player 1's ships
 
     print("Player 2, place your ships.") #prompt player 2 to place ships
-    placeShips(opponentBoard, shipSizes[numShips]) #place player 2's ships
+    placeShips(opponentBoard, shipSizes[numShips], ai_player) #place player 2's ships
 
     playerTrackingBoard = createEmptyBoard() #create tracking board for player 1
     opponentTrackingBoard = createEmptyBoard() #create tracking board for player 2
@@ -111,7 +197,8 @@ def setupGame(): #sets up the game
     playerShips = {f"S{i+1}": shipSizes[numShips][i] for i in range(numShips)} #track player ship health
     opponentShips = {f"S{i+1}": shipSizes[numShips][i] for i in range(numShips)} #track opponent ship health
 
-    return playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips #return setup
+    return playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips, ai_player, difficulty #return setup
+
 
 def clear_terminal():
     if platform.system() == "Windows":
@@ -122,7 +209,7 @@ def clear_terminal():
 def start_game(scoreboard): # start game
     #print("Welcome to Battleship!") #welcome
     
-    playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips = setupGame() #setup the game
+    playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips, ai_player, difficulty = setupGame() #setup the game
 
     while True: #game loop
         print("\nPlayer 1's turn.") #player 1's turn
@@ -142,7 +229,7 @@ def start_game(scoreboard): # start game
         print("Your board")
 
         printBoard(opponentTrackingBoard) #show player 2's tracking board
-        playerTurn(playerBoard, playerShips, opponentTrackingBoard) #player 2 attacks
+        playerTurn(playerBoard, playerShips, opponentTrackingBoard, ai_player, difficulty) #player 2 attacks
         if allShipsSunk(playerShips): #check if player 1's ships are sunk
             print("Player 2 wins!") #player 2 wins
             scoreboard.update_winner("Player 2") #give player 2 point
