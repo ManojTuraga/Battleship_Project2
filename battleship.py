@@ -1,4 +1,8 @@
+import os
+import platform 
 from bullet import *
+from visuals import Visuals
+from scoreboard import *
 
 boardSize = 10 #make the board 10x10
 letters = "ABCDEFGHIJ" #string that contains column labels
@@ -109,8 +113,14 @@ def setupGame(): #sets up the game
 
     return playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips #return setup
 
-def main(): #main
-    print("Welcome to Battleship!") #welcome
+def clear_terminal():
+    if platform.system() == "Windows":
+        os.system("cls")
+    else:
+        os.system("clear")
+
+def start_game(scoreboard): # start game
+    #print("Welcome to Battleship!") #welcome
     
     playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips = setupGame() #setup the game
 
@@ -123,6 +133,7 @@ def main(): #main
         playerTurn(opponentBoard, opponentShips, playerTrackingBoard) #player 1 attacks
         if allShipsSunk(opponentShips): #check if player 2's ships are sunk
             print("Player 1 wins!") #player 1 wins
+            scoreboard.update_winner("Player 1") #give point to player 1
             break #stop the loop
 
         print("\nPlayer 2's turn.") #player 2's turn
@@ -134,7 +145,45 @@ def main(): #main
         playerTurn(playerBoard, playerShips, opponentTrackingBoard) #player 2 attacks
         if allShipsSunk(playerShips): #check if player 1's ships are sunk
             print("Player 2 wins!") #player 2 wins
+            scoreboard.update_winner("Player 2") #give player 2 point
             break #stahp
+
+    #display scoreboard after the game ends
+    scoreboard.display_scores()
+
+    #ask if the players want to play again
+    while True:
+        play_again = input("Do you want to play again? (y/n): ").strip().lower()
+        if play_again == 'y':
+            clear_terminal()
+            return True  #start a new game
+        elif play_again == 'n':
+            print("Thanks for playing!")
+            return False  #exit the game
+        else:
+            print("Invalid input. Please enter 'y' for yes or 'n' for no.")
+
+def main(): #main
+    scoreboard = Scoreboard()  #initialize scoreboard
+    visuals = Visuals(None)  #create an instance of visuals
+    
+    while True:
+        #opening choices/main menu
+        print("Welcome to Battleship!")
+        print("1. View Bullet Types")
+        print("2. Play Game")
+        choice = input("Choose an option: ").strip()
+        
+        if choice == "1":
+            visuals.display_bullet_types()  #call the method on the visuals instance
+            input("\nPress Enter to return to the main menu...")  #have user press enter to go to main menu
+        
+        elif choice == "2":
+            if not start_game(scoreboard):  #if players choose not to play again, end the program
+                break
+        
+        else:
+            print("Invalid option. Try again.")  
 
 if __name__ == "__main__":
     main()
