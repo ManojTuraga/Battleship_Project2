@@ -141,3 +141,51 @@ class Bullet:
 #Bullets used for testing purposes
 test_bullet = Bullet(rank=-2, flavor_text="I am for testing only.", hit_pattern=["XBB", "AXA", "~O~"], name= "Test Bullet")
 basic_bullet = Bullet(rank=-1, flavor_text="Basic Shot.", hit_pattern=["X"], name= "Basic Bullet")
+
+## Special Bullet Implementation
+class BasicBullet(Bullet):
+    def __init__(self):
+        self.rank = -1
+        self.flavor_text = "Basic Shot."
+        self.hit_pattern = ["X"]
+        self.name = "Basic Bullet"
+
+
+class ClusterBomb(Bullet):
+    def __init__(self):
+        self.name = "Cluster Bomb"
+        self.rank = 1
+        self.flavor_text = "This has damage that spreads out over and area. "
+        self.hit_pattern = ["~X~", "X~X", "~X~"]
+
+        
+class Flare(Bullet):
+    def __init__(self):
+        self.name = "Flare"
+        self.rank = 1
+        self.flavor_text = "This lights up and reveals an area. "
+        self.hit_pattern = ["OOO", "OOO", "000"]
+
+
+class TracerRounds(Bullet):
+    def __init__(self):
+        self.name = "Tracer Rounds"
+        self.rank = 4
+        self.flavor_text = "These reveal the area they shoot at while still being bullets. "
+        self.hit_pattern = ["~X~", "~O~", "~O~"]
+
+        
+class FlakBlast(Bullet):
+    def __init__(self):
+        self.name = "FlakBlast"
+        self.rank = 10
+        self.flavor_text = "You can use these to attack planes in a big area. "
+        self.hit_pattern = ["AABBB", "BBAAB", "AAXBB", "BBBBA", "AAABB"]
+
+
+class IncendiaryShot(Bullet):
+    def __init__(self):
+        self.name = "IncendiaryShot"
+        self.rank = 11
+        self.flavor_text = "This makes fire with some randomness. "
+        self.hit_pattern = ["AXA", "AXA", "AAA"]
