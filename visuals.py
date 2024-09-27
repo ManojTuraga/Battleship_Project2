@@ -23,14 +23,34 @@ class Visuals:
     def display_bullet_types(self):
         print()
         print("Available Bullets:")
-        all_bullets = [
-            {'name': 'Test Bullet', 'flavor': 'I am for testing only', 'pattern': 'XBB, AXA, ~O~'},
-            {'name': 'Basic Bullet', 'flavor': 'This is your typical one coordinate shot', 'pattern': 'X'}
-        ]
+        all_bullets = [standard_bullet] + all_special_bullet_list
         for bullet in all_bullets:
             print()
-            print("-----------------------------")
-            print(f"Bullet Name: {bullet['name']}")
-            print(f"Description: {bullet['flavor']}")
-            print(f"Hit Pattern: {bullet['pattern']}")
-            print("-----------------------------")
+            self.display_bullet(bullet)
+
+        #more padding.
+        print()
+
+    #A small added function to encapsulate the functionality of printing the stuff from a single bullet.
+    def display_bullet(self, bullet_in):
+        print("-----------------------------")
+        print(f"Bullet Name: {bullet_in.name}")
+        print(f"Description: {bullet_in.flavor_text}")
+        #build a string of the displayed bullet hit pattern
+        display_string = "Hit Pattern: \n"
+
+        for row in bullet_in.hit_pattern:
+            display_string += "  " + " ".join(str(row)) + "\n"
+
+        print(display_string)
+        print("-----------------------------")
+
+    #this came up a few times, so I decided to just make a helper function to print it out.
+    def display_hit_pattern_info(self):
+        print("Hit pattern key:")
+        print("The center of the pattern is where you aimed at.")
+        print("~ means nothing is done to that cell.")
+        print("X means that cell is attacked.")
+        print("O means that cell is revealed.")
+        print("A random 'A' cell in each pattern is attacked.")
+        print("A random 'B' cell in each pattern is attacked.")
