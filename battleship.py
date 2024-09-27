@@ -1,35 +1,4 @@
-'''
-Date
-Sept 11, 2024
-
-Program Name
-Battleship.py
-
-Description
-A python program that runs a battleship game.
-
-Inputs
-* Number of ships (int)
-* Ship Coordinates (str)
-* Ship Orientation (str)
-* Attack Coordinates (str)
-
-Outputs
-* Board Display (str)
-* Prompts (str)
-* Feedback on Actions (str)
-* Sunk Ship Announcements (str)
-* Victory Message (str)
-
-Authors / Members
-* Abinav Krishnan
-* Ansh Rajput
-* Liv Sutton
-* Ojas Patil
-* Priyatam Nuney
-
-'''
-
+from bullet import *
 
 boardSize = 10 #make the board 10x10
 letters = "ABCDEFGHIJ" #string that contains column labels
@@ -112,20 +81,7 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard): #handles a pl
     while True: #loop until attack
         col, row = getCoordinatesInput() #get attack coordinates
 
-        if playerTrackingBoard[row][col] != '~': #check if already attacked
-            print("You've already fired at this location. Try again.") #already attacked message
-            continue #continue asking
-
-        hit, shipId = checkHitOrMiss(opponentBoard, row, col) #check if hit
-        if hit:
-            print("It's a hit!") #notify hit
-            opponentShips[shipId] -= 1 #reduce ship's health
-            playerTrackingBoard[row][col] = "X" #mark hit on tracking board
-            if opponentShips[shipId] == 0: #if ship sunk
-                print(f"You sunk the opponent's {shipId}!") #notify ship sunk
-        else:
-            print("It's a miss.") #notify miss
-            playerTrackingBoard[row][col] = "O" #mark miss
+        opponentBoard, playerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = test_bullet.shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
         break #end turn
 
 def setupGame(): #sets up the game
@@ -135,6 +91,10 @@ def setupGame(): #sets up the game
             numShips = int(numShips) #convert to integer
             break
         print("Invalid number. Try again.") #invalid number message
+
+    #You choose bullets after the number ships
+    #I dont want any dumb games of the bullets you getting influencing the ship count
+    player1_magazine, player2_magazine = run_draft()
 
     playerBoard = createEmptyBoard() #create player 1 board
     opponentBoard = createEmptyBoard() #create player 2 board
@@ -180,5 +140,79 @@ def main(): #main
             print("Player 2 wins!") #player 2 wins
             break #stahp
 
+#ok, here will eventually be the function to generate a random bullet.
+#it will be used to make the random choices.
+#for now, we need it to return basic bullet or test bullet at random.
+def randomBullet():
+    if random.randint(0,1) == 0:
+        return test_bullet
+    
+    return basic_bullet
+
+#we will also define a function that is repsonsible for the overall "draft" part of the game.
+#it is run at the start of main
+def run_draft():
+    #first, we generate the pool of 12 bullets
+    bullet_pool = []
+    for i in range(12):
+        bullet_pool.append(randomBullet())
+
+    #now, we set up variables to allow players to pick them
+    player_1_bullets = []
+    player_2_bullets = []
+    turn = 1
+    picks = 1
+
+    #display the bullet list
+    print("Available Bullets:")
+    print(str(bullet_pool)) #TODO fancy me
+    print("Press enter to continue.")
+    input("> ")
+
+    #take turns picking ammo until 2 remain. They are discarded. Lets the players know.
+    print("Take turns picking bullets until 2 remain, which will be discarded.")
+
+    while len(bullet_pool) > 2:
+        print("Player", str(turn), "turn.")
+        print("Picks left this turn:", str(picks))
+        print("Available Bullets:")
+        print(str(bullet_pool)) #TODO fancy me
+
+        bullet_choice = None
+        print("Choose one.")
+        while bullet_choice == None:
+            temp = int(input("> "))
+            if temp < 0 or temp >= len(bullet_pool):
+                print("Invalid choice, try again.")
+
+            else:
+                bullet_choice = temp
+
+        #now, remove that bullet from the pool and add it to the player's pool
+        if turn == 1:
+            player_1_bullets.append(bullet_pool[bullet_choice])
+
+        else:
+            player_2_bullets.append(bullet_pool[bullet_choice])
+
+        bullet_pool.remove(bullet_pool[bullet_choice])
+
+        #progress the turn
+        picks -= 1
+        if picks == 0:
+            turn %= 2
+            turn += 1
+            # a special helper to make UI better for last choice
+            if len(bullet_pool) == 3:
+                picks = 1
+
+            else:
+                picks = 2
+
+    #return the lists gotten this way.
+    return player_1_bullets, player_2_bullets
+
 if __name__ == "__main__":
+    #Bullets used for testing purposes
+
     main()
