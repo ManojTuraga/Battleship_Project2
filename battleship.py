@@ -231,26 +231,118 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=Fals
                 print("You don't have any special bullets left to use, try another option!")
                 continue
 
-            break #temporary so the game doesn't brick. Remove once this section is implemented.
-
             #shoot a special bullet.
             if ai_player:
                 #ai player area
                 if difficulty == 1:
                     #easy ai area.
-                    pass
+                    #they will always fire thier lowest-rank bullet first.
+                    lowest_rank = None
+                    for i in range(len(magazine)):
+                        if lowest_rank == None or lowest_rank > magazine[i].rank:
+                            lowest_rank = magazine[i].rank
+
+                    for i in range(len(magazine)):
+                        if magazine[i].rank == lowest_rank:
+                            break
+
+                    #now, i will be equal to the index of the bullet in your magazine that you want to use.
+                    
+                    row, col = ai.generateAICoords()
+
+                    #ok, we have the location and the bullet at this point.
+
+                    #shooting will be done down below, in the area common to all AIs
 
                 elif difficulty == 2:
                     #medium ai area.
-                    pass
+                    #they will always fire one of their bullets at random.
+                    i = random.randint(0, len(magazine) - 1)
+
+                    #now, i will be equal to the index of the bullet in your magazine that you want to use.
+                    
+                    if ai.SHIP_HIT:
+                        row, col = ai.STACK.pop()
+                        ai.USED_COORDS.add((row, col))
+                    else:
+                        row, col = ai.generateAICoords()
+
+                    #ok, we have the location and the bullet at this point.
+
+                    #shooting will be done down below, in the area common to all AIs
 
                 elif difficulty == 3:
                     #hard ai area.
-                    pass
+                    #they will always fire their highest-rank bullets first.
+                    highest_rank = None
+                    for i in range(len(magazine)):
+                        if highest_rank == None or highest_rank < magazine[i].rank:
+                            highest_rank = magazine[i].rank
+
+                    for i in range(len(magazine)):
+                        if magazine[i].rank == highest_rank:
+                            break
+
+                    #now, i will be equal to the index of the bullet in your magazine that you want to use.
+
+                    row, col = ai.OPPONENT_LOCATION.pop()
+
+                    #ok, we have the location and the bullet at this point.
+
+                    #shooting will be done down below, in the area common to all AIs
+
+                #shoot it
+                newOpponentBoard, newPlayerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = magazine[i].shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
+                #remove it from the magazine.
+                magazine.remove(magazine[i])
+
+                #TODO
+                #Tell the player about the effects of the bullet being shot, update the information within the AI
+                #update the board given the effects of the bullet that we now know.
+
+                #end your turn
+                break
 
             else:
                 #human player area.
-                pass
+                #first, display all of the bullets to the player for them to select one of them.
+                for i in range(len(magazine)):
+                    visuals_.display_bullet(bullet_in=magazine[i])
+
+                #Select one
+                print("Select one of the above bullets you have, using the number assocoated with it.")
+                while True:
+                    player_bullet_choice = input("> ")
+                    try:
+                        temp = magazine[int(player_bullet_choice)]
+
+                        #looks like the bullet choice was valid if temp worked, so we can save the choice int and exit the loop
+                        player_bullet_choice = int(player_bullet_choice)
+
+                        break
+
+                    except:
+                        #must have been invalid. Get the player to try again.
+                        print("Invalid choice. Try again.")
+
+                #now we have the choice, so get the coordinates to shoot the bullet at.
+
+                col, row = getCoordinatesInput()
+                
+                #now, shoot the bullet.
+                newOpponentBoard, newPlayerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = magazine[i].shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
+
+                #remove it from your magazine.
+                magazine.remove(magazine[player_bullet_choice])
+
+                #tell the player about what happened, well.
+                #TODO
+
+                #update all maps that need updating.
+                #TODO
+
+                #end your turn
+                break
 
         elif selected_turn_option == "Attack Normally":
             if ai_player and difficulty == 1:
@@ -517,6 +609,13 @@ def start_game(scoreboard): # start game
             scoreboard.update_winner("Player 1") #give point to player 1
             break #stop the loop
 
+        #this allows the hotseat mechanism to work a lot better, so no seeing the other player's board.
+        if not ai_player:
+            clear_terminal()
+            print("Waiting for player 2. Player 2, press enter to start turn.")
+            input("> ")
+            clear_terminal()
+
         print("\nPlayer 2's turn.") #player 2's turn
         print("Your board")
         printBoard(opponentBoard) #show player 2's board
@@ -535,6 +634,13 @@ def start_game(scoreboard): # start game
             print("Player 2 wins!") #player 2 wins
             scoreboard.update_winner("Player 2") #give player 2 point
             break #stahp
+
+        #this allows the hotseat mechanism to work a lot better, so no seeing the other player's board.
+        if not ai_player:
+            clear_terminal()
+            print("Waiting for player 2. Player 2, press enter to start turn.")
+            input("> ")
+            clear_terminal()
 
     #display scoreboard after the game ends
     scoreboard.display_scores()
