@@ -611,6 +611,8 @@ def start_game(scoreboard): # start game
 
         #this allows the hotseat mechanism to work a lot better, so no seeing the other player's board.
         if not ai_player:
+            print("Player 1, press enter when you want your turn to end. This will clear the console, so look at things before that.")
+            input("> ")
             clear_terminal()
             print("Waiting for player 2. Player 2, press enter to start turn.")
             input("> ")
@@ -637,8 +639,10 @@ def start_game(scoreboard): # start game
 
         #this allows the hotseat mechanism to work a lot better, so no seeing the other player's board.
         if not ai_player:
+            print("Player 2, press enter when you want your turn to end. This will clear the console, so look at things before that.")
+            input("> ")
             clear_terminal()
-            print("Waiting for player 2. Player 2, press enter to start turn.")
+            print("Waiting for player 1. Player 1, press enter to start turn.")
             input("> ")
             clear_terminal()
 
