@@ -26,104 +26,45 @@ Authors / Members
 * Ansh Rajput
 * Liv Sutton
 * Ojas Patil
-* Priyatam Nuney
+* Priyatam NuneyS
 
 '''
 import ai
-import os
-import platform 
 from bullet import *
 from visuals import Visuals
 from scoreboard import *
+from board_util import *
 
-boardSize = 10 #make the board 10x10
-letters = "ABCDEFGHIJ" #string that contains column labels
+def display_bullets( visuals_, magazine ):
+    if magazine == []:
+        print("(None.)")
 
-shipSizes = {  # dictionary for ship sizes based on amount
-    1: [1], #ships of size 1 for 1 ship
-    2: [1, 2], #ships of size 1 and 2 for 2 ships
-    3: [1, 2, 3], #ships of size 1, 2, and 3 for 3 ships
-    4: [1, 2, 3, 4], #ships of size 1, 2, 3, 4 for 4 ships
-    5: [1, 2, 3, 4, 5] #ships of size 1, 2, 3, 4, and 5 for 5 ships
-}
+    else:
+        for i in range(len(magazine)):
+            print( f"Bullet {i}:" )
+            visuals_.display_bullet(bullet_in=magazine[i])
+            print()
 
-
-def printBoard(board): #prints the board with row and column labels
-    print("   " + "  ".join(letters)) #print column labels
-    for i in range(boardSize): #loop through rows
-        row = [str(cell) for cell in board[i]] #convert cells to strings
-        print((f"{i + 1:2} {' '.join(row)}").replace("~", "Q").replace("Q", "~~")) #print row number and cells
-        #replace nonsense is to make things display more cleanly
-
-def createEmptyBoard(): #creates a blank board
-    return [['~'] * boardSize for _ in range(boardSize)] #fill board with waves (~)
+def get_user_confirmation():
+    print("Press enter to continue.")
+    input("> ")
 
 
-def getCoordinatesInput(): #gets coordinates
-    while True: #loop
-        coordinates = input("Enter the coordinates (e.g. A5): ").strip().upper() #get input and format it
-        if len(coordinates) < 2: #check if too short
-            print("Invalid input. Try again.") #print error message
-            continue #continue asking
-        col, row = coordinates[0], coordinates[1:] #split input into column and row
-        if col in letters and row.isdigit() and 1 <= int(row) <= 10: #check if column and row are valid
-            return letters.index(col), int(row) - 1 #return indices
-        print("Invalid coordinates. Try again.") #if invalid, ask again
-
-
-def placeShipOnBoard(board, size, shipId, ai_player=False): #places a ship on the board
-        
-    while True: #loop
-        if ai_player:
-            col, row, orientation = ai.generateAICoords(is_setup=True)
-        else:
-            col, row = getCoordinatesInput() #get coordinates
-            orientation = input("Enter H (Horizontal) or V (Vertical): ").strip().upper()#get orientation
-
-        if orientation == 'H': #horizontal placement
-            if col + size > boardSize or any(board[row][col + i] != '~' for i in range(size)): #check fit and availability
-                if not ai_player: print("Invalid placement. Try again.") #invalid placement message
-                continue #continue asking
-            for i in range(size): #loop through board
-                if not ai_player:  ai.OPPONENT_LOCATION.append((row, col+i))
-                board[row][col + i] = shipId #place ship horizontally
-            
-            print("\nCurrent board:")# show board
-            printBoard(board) #print the board
-            break
-        elif orientation == 'V': #vertical placement
-            if row + size > boardSize or any(board[row + i][col] != '~' for i in range(size)): #check fit and availability
-                if not ai_player: print("Invalid placement. Try again.") #invalid placement message
-                continue #continue asking
-            for i in range(size): #loop through board
-                if not ai_player: ai.OPPONENT_LOCATION.append((row+i, col))
-                board[row + i][col] = shipId #place ship vertically
-            
-            print("\nCurrent board:")# show board
-            printBoard(board) #print the board
-            break
-        else:
-            if not ai_player: print("Invalid orientation. Try again.") #if orientation is invalid
-
-
-def placeShips(board, shipSizes, ai_player=False): #places multiple ships on the board
-    print("\nCurrent board:")
-    printBoard(board) # Print the empty board before placing ships
-    for i, size in enumerate(shipSizes): #loop through ships
-        placeShipOnBoard(board, size, f"S{i+1}", ai_player) #place each ship
-
-
-def allShipsSunk(shipHits): #checks if all ships are sunk
-    return all(hit == 0 for hit in shipHits.values()) #return True if all ships are sunk
-
-
-def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=False, difficulty=None, player_no="-1", magazine = [], opponent_magazine = []): #handles a player's turn
-    print("Player,", player_no, "turn.") #prompt player's turn
-
+def playerTurn(opponentBoard, opponentShips, playerBoard, playerTrackingBoard, ai_player=False, difficulty=None, player_no="-1", magazine = [], opponent_magazine = []): #handles a player's turn
     #make a visuals object to help with this
     visuals_ = Visuals(None)
 
     while True: #loop until done
+        print("Player", player_no, "turn.") #prompt player's turn
+
+        print("Opponent's board:")
+        printBoard(playerTrackingBoard)
+        print()
+
+        print("Your board:")
+        printBoard(playerBoard)
+        print()
+        
         #now, we have to offer the player some options.
         #I want to offer looking at your own magazine, looking at the opponent's, conceding, attacking normally, or using a speical bullet.
         #oh also seeing hit pattern info.
@@ -167,6 +108,7 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=Fals
         if selected_turn_option == "Concede":
             #ask the player if they really want to.
             #also, AI can never do this so we do not need to worry about them here.
+            clear_terminal()
             print("Do you really want to concede? (y/n)")
             while True:
                 player_concede = input("> ")
@@ -181,55 +123,45 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=Fals
 
         elif selected_turn_option == "Look at your Bullets":
             #show the bullets that you have
+            clear_terminal()
             print("The following are the bullets you have currently:")
 
-            if magazine == []:
-                print("(None.)")
-            
-            else:
-                #show the bullets
-                for bullet_ in magazine:
-                    visuals_.display_bullet(bullet_in=bullet_)
-
-            print()
+            display_bullets( visuals_, magazine )
 
             #wait until confirmation to exit, while the player looks at this.
             print("Press enter to continue.")
             input("> ")
+            clear_terminal()
 
         elif selected_turn_option == "Look at opponent's Bullets":
             #show the opponent's bullets.
+            clear_terminal()
             print("The following are the bullets your opponent has currently:")
 
-            if opponent_magazine == []:
-                print("(None.)")
-            
-            else:
-                #show the bullets
-                for bullet_ in opponent_magazine:
-                    visuals_.display_bullet(bullet_in=bullet_)
-
-            print()
+            display_bullets( visuals_, opponent_magazine )
 
             #wait until confirmation to exit, while the player looks at this.
-            print("Press enter to continue.")
-            input("> ")
+            get_user_confirmation()
+            clear_terminal()
 
         elif selected_turn_option == "See hit Pattern Info":
             #show the player the info on hit patterns, for if they forget.
+            clear_terminal()
             visuals_.display_hit_pattern_info()
 
             print()
 
             #wait until confirmation to exit, while the player looks at this.
-            print("Press enter to continue.")
-            input("> ")
+            get_user_confirmation()
+            clear_terminal()
 
         elif selected_turn_option == "Use Special Bullet":
             #a catcher for if a player with no bullets left tries to use this.
             if len(magazine) == 0:
                 print("You don't have any special bullets left to use, try another option!")
                 continue
+            
+            ai_selection_func = None
 
             #shoot a special bullet.
             if ai_player:
@@ -307,10 +239,12 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=Fals
                 #human player area.
                 #first, display all of the bullets to the player for them to select one of them.
                 for i in range(len(magazine)):
+                    print( f"Bullet {i}:" )
                     visuals_.display_bullet(bullet_in=magazine[i])
+                    print()
 
                 #Select one
-                print("Select one of the above bullets you have, using the number assocoated with it.")
+                print("Select one of the above bullets you have, using the number associated with it.")
                 while True:
                     player_bullet_choice = input("> ")
                     try:
@@ -330,18 +264,18 @@ def playerTurn(opponentBoard, opponentShips, playerTrackingBoard, ai_player=Fals
                 col, row = getCoordinatesInput()
                 
                 #now, shoot the bullet.
-                newOpponentBoard, newPlayerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = magazine[i].shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
+                newOpponentBoard, newPlayerTrackingBoard, opponentShips, got_hit, got_sink, hits, sinks = magazine[player_bullet_choice].shoot(enemy_board=opponentBoard, knowledge_board=playerTrackingBoard, aim_coordinates = [col, row], opponentShips=opponentShips)
+
+                for i in range( len( newOpponentBoard ) ):
+                    for j in range( len( newOpponentBoard ) ):
+                        opponentBoard[ i ][ j ] = newOpponentBoard[ i ][ j ]
+
+                for i in range( len( newPlayerTrackingBoard ) ):
+                    for j in range( len( newPlayerTrackingBoard ) ):
+                        playerTrackingBoard[ i ][ j ] = newPlayerTrackingBoard[ i ][ j ]
 
                 #remove it from your magazine.
                 magazine.remove(magazine[player_bullet_choice])
-
-                #tell the player about what happened, well.
-                #TODO
-
-                #update all maps that need updating.
-                #TODO
-
-                #end your turn
                 break
 
         elif selected_turn_option == "Attack Normally":
@@ -405,18 +339,22 @@ def setupGame(): #sets up the game
         print("Invalid number. Try again.") #invalid number message
         
     ai_player, difficulty = ai.determine_ai_player()
+    clear_terminal()
         
     playerBoard = createEmptyBoard() #create player 1 board
     opponentBoard = createEmptyBoard() #create player 2 board
 
     #Now, we make the players each select their bullets.
     player1_magazine, player2_magazine = run_draft(player1_ai= False, player1_difficulty= None, player2_ai= ai_player, player2_difficulty= difficulty)
+    clear_terminal()
 
     print("Player 1, place your ships.") #prompt player 1 to place ships
     placeShips(playerBoard, shipSizes[numShips]) #place player 1's ships
+    clear_terminal()
 
     print("Player 2, place your ships.") #prompt player 2 to place ships
     placeShips(opponentBoard, shipSizes[numShips], ai_player) #place player 2's ships
+    clear_terminal()
 
     playerTrackingBoard = createEmptyBoard() #create tracking board for player 1
     opponentTrackingBoard = createEmptyBoard() #create tracking board for player 2
@@ -451,35 +389,42 @@ def run_draft(player1_ai = False, player2_ai = False, player1_difficulty = None,
     #display the bullet list
     #make a visuals object to help with this
     visuals_ = Visuals(None)
-    print("Available Bullets:")
+    print("Available Bullets:\n")
     for i in range(len(bullet_pool)):
-        print(str(i) + "- ")
+        print(f"Bullet {i}: ")
         visuals_.display_bullet(bullet_in=bullet_pool[i])
+        print()
     print("Press enter to continue.")
     input("> ")
-
-    #take turns picking ammo until 2 remain. They are discarded. Lets the players know.
-    print("Take turns picking bullets until 2 remain, which will be discarded.")
-
+    clear_terminal()
+    
     while len(bullet_pool) > 2:
+        #take turns picking ammo until 2 remain. They are discarded. Lets the players know.
+        clear_terminal()
+        print("Take turns picking bullets until 2 remain, which will be discarded.\n")
+
         if eval("player" + str(turn) + "_ai") == False:
             #only show this sort of thing to players
-            print("Available Bullets:")
+            print("Available Bullets:\n")
             for i in range(len(bullet_pool)):
-                print(str(i) + "- ")
+                print(f"Bullet {i}: ")
                 visuals_.display_bullet(bullet_in=bullet_pool[i])
-                visuals_.display_hit_pattern_info()
+                print()
 
         print("PLAYER", str(turn), "TURN.") #in caps so that the players hopefully do not accidentally pick for one another.
 
         if eval("player" + str(turn) + "_ai") == False:
             #human player selector area.
             print("Picks left this turn:", str(picks))
-            print("Choose one, using the number displayed before it.")
+            print("Choose one, using the numeric ID of the bullet.")
 
             bullet_choice = None
             while bullet_choice == None:
-                temp = int(input("> "))
+                try:
+                    temp = int(input("> "))
+                except:
+                    continue
+                
                 if temp < 0 or temp >= len(bullet_pool):
                     print("Invalid choice, try again.")
 
@@ -579,72 +524,55 @@ def run_draft(player1_ai = False, player2_ai = False, player1_difficulty = None,
     #return the lists gotten this way.
     return player_1_bullets, player_2_bullets
 
-def clear_terminal():
-    if platform.system() == "Windows":
-        os.system("cls")
-    else:
-        os.system("clear")
-
 def start_game(scoreboard): # start game
     #print("Welcome to Battleship!") #welcome
     
     playerBoard, opponentBoard, playerTrackingBoard, opponentTrackingBoard, playerShips, opponentShips, ai_player, difficulty, player1_magazine, player2_magazine = setupGame() #setup the game
+    
+    board_mapping = \
+        {
+        '1': { "player board": playerBoard, "player tracking board": playerTrackingBoard, "player ships": playerShips, "player magazine": player1_magazine, 
+               "opponent board": opponentBoard, "opponent tracking board": opponentTrackingBoard, "opponent ships": opponentShips, "opponent magazine": player2_magazine },
+        '2': { "player board": opponentBoard, "player tracking board": opponentTrackingBoard, "player ships": opponentShips, "player magazine": player2_magazine, 
+               "opponent board": playerBoard, "opponent tracking board": playerTrackingBoard, "opponent ships": playerShips, "opponent magazine": player1_magazine }
+        }
+    
+    cur_player = '1'
+    op_player = '2'
 
     while True: #game loop
-        print("\nPlayer 1's turn.") #player 1's turn
-        print("Your board")
-        printBoard(playerBoard) #show player 1's board
-        print("Your board")
-        printBoard(playerTrackingBoard) #show player 1's tracking board
-        concede_maybe = playerTurn(opponentBoard, opponentShips, playerTrackingBoard, player_no="1", magazine = player1_magazine, opponent_magazine=player2_magazine) #player 1 attacks
+        clear_terminal()
+        opponentBoardRef = board_mapping[ cur_player ][ "opponent board" ]
+        opponentShipsRef = board_mapping[ cur_player ][ "opponent ships" ]
+        playerBoardRef = board_mapping[ cur_player ][ "player board" ]
+        magazineRef = board_mapping[ cur_player ][ "player magazine" ]
+        opponentMagazineRef = board_mapping[ cur_player ][ "opponent magazine" ]
+
+        concede_maybe = playerTurn(opponentBoardRef, opponentShipsRef, playerBoardRef, playerTrackingBoard, player_no=cur_player, magazine = magazineRef, opponent_magazine=opponentMagazineRef) #player 1 attacks
 
         #check for a concession
         if concede_maybe == "Conceded":
-            print("Player 2 wins!")
-            scoreboard.update_winner("Player 2") #give point to player 1
+            print(f"Player {op_player} wins!")
+            scoreboard.update_winner(f"Player {op_player}") #give point to player 1
             break #stop the loop
 
         if allShipsSunk(opponentShips): #check if player 2's ships are sunk
-            print("Player 1 wins!") #player 1 wins
-            scoreboard.update_winner("Player 1") #give point to player 1
+            print(f"Player {cur_player} wins!") #player 1 wins
+            scoreboard.update_winner(f"Player {cur_player}") #give point to player 1
             break #stop the loop
 
         #this allows the hotseat mechanism to work a lot better, so no seeing the other player's board.
         if not ai_player:
-            print("Player 1, press enter when you want your turn to end. This will clear the console, so look at things before that.")
+            print(f"Player {cur_player}, press enter when you want your turn to end. This will clear the console, so look at things before that.")
             input("> ")
             clear_terminal()
-            print("Waiting for player 2. Player 2, press enter to start turn.")
+            print(f"Waiting for player {op_player}. Player {op_player}, press enter to start turn.")
             input("> ")
             clear_terminal()
 
-        print("\nPlayer 2's turn.") #player 2's turn
-        print("Your board")
-        printBoard(opponentBoard) #show player 2's board
-        print("Your board")
-
-        printBoard(opponentTrackingBoard) #show player 2's tracking board
-        concede_maybe = playerTurn(playerBoard, playerShips, opponentTrackingBoard, ai_player, difficulty, player_no="2", magazine=player2_magazine, opponent_magazine=player1_magazine) #player 2 attacks
-        
-        #check for a concession
-        if concede_maybe == "Conceded":
-            print("Player 1 wins!")
-            scoreboard.update_winner("Player 1") #give point to player 1
-            break #stop the loop
-        
-        if allShipsSunk(playerShips): #check if player 1's ships are sunk
-            print("Player 2 wins!") #player 2 wins
-            scoreboard.update_winner("Player 2") #give player 2 point
-            break #stahp
-
-        #this allows the hotseat mechanism to work a lot better, so no seeing the other player's board.
-        if not ai_player:
-            print("Player 2, press enter when you want your turn to end. This will clear the console, so look at things before that.")
-            input("> ")
-            clear_terminal()
-            print("Waiting for player 1. Player 1, press enter to start turn.")
-            input("> ")
-            clear_terminal()
+        temp = cur_player
+        cur_player = op_player
+        op_player = temp
 
     #display scoreboard after the game ends
     scoreboard.display_scores()
@@ -667,17 +595,20 @@ def main(): #main
     
     while True:
         #opening choices/main menu
+        clear_terminal()
         print("Welcome to Battleship!")
         print("1. View Bullet Types")
         print("2. Play Game")
         choice = input("Choose an option: ").strip()
         
         if choice == "1":
+            clear_terminal()
             visuals.display_bullet_types()  #call the method on the visuals instance
             visuals.display_hit_pattern_info() #for player info
             input("\nPress Enter to return to the main menu...")  #have user press enter to go to main menu
         
         elif choice == "2":
+            clear_terminal()
             if not start_game(scoreboard):  #if players choose not to play again, end the program
                 break
         
