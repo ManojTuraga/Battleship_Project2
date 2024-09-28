@@ -8,7 +8,8 @@ def checkHitOrMiss(board, row, col): #checks if an attack is a hit or miss
         shipId = board[row][col] #get ship ID
         board[row][col] = "X" #mark hit
         return True, shipId #return hit and ship ID
-    board[row][col] = "O" #mark miss
+    if board[ row ][ col ] == '~':
+        board[row][col] = "O" #mark miss
     return False, None #return miss
 
 
