@@ -2,8 +2,7 @@
 Module: board_util.py
 Creation Date: September 11th, 2024
 Author: Team 19 Devs
-Contributors: Manoj Turaga
-Sources:
+Contributors: Manoj Turaga, Connor Forristal
 
 Description:
     This is the "remnants" of the original battleship program. Due to the nature
@@ -15,7 +14,7 @@ Inputs:
 Outputs:
     None
 
-Sources: GeeksforGeeks/Team 42 initial Battleship implementation
+Sources:
 '''
 ###############################################################################
 # Imports

@@ -1,9 +1,8 @@
 '''
 Module: ai.py
 Creation Date: September 23rd, 2024
-Author: Connor Forrsital
+Author: Connor Forristal
 Contributors: Connor Forristal, Manoj Turaga
-Sources:
 
 Description:
     This module is our implemenation for the Battleship AI. This module will act
@@ -17,7 +16,7 @@ Inputs:
 Outputs:
     Coordinates of interest
 
-Sources: GeeksforGeeks/Team 42 initial Battleship implementation
+Sources:
 '''
 ###############################################################################
 # Imports
@@ -114,12 +113,17 @@ def determine_ai_player():
     # valid
     while True:
         ai_player = input("Do you want to play against an AI? (Y/N): ").strip()
+
+        # If the player wants to play against an AI, obtain
+        # difficulty of the ai as another prompt
         if ai_player in ["Y", "y", "yes"]:
             ai_player = True
             
             diff_hash = {"1" : 1, "Easy" : 1, "easy" : 1, 
                          "2" : 2, "Medium" : 2, "medium" : 2, 
                          "3" : 3, "Hard" : 3, "hard" : 3}
+            
+            # Keep trying to get a valid input from the user
             while True:
                 difficulty = input("Select Ai difficulty:\n1) Easy\n2) Medium\n3) Hard\n-> ").strip()
                 if difficulty in diff_hash.keys():
@@ -129,6 +133,8 @@ def determine_ai_player():
             
             break
         
+        # If the player doesn't want to play against an AI,
+        # INdicate that the other player will not be an AI
         elif ai_player in ["N", "n", "no"]:
             ai_player = False 
             break
@@ -139,7 +145,21 @@ def determine_ai_player():
 
 
 def next_location(direction, row, col):
-    
+    """
+    Function: Next Location
+
+    Description: This function is a helper function that returns the next possible
+                 coordinate given a direction. Note that this function does not have
+                 any runtime checks and instead relies on the checks done by the
+                 calling function
+
+    Inputs: Direction of next coordinate, current coordinate
+    Outputs: Location of next coordinate
+    """
+    # Essentially, given the current coordinate, compute the location of the
+    # next coordiante using the direction. The direction uses the same
+    # nomenclature as the main cardinal directions on a compass, so direction
+    # of computation is normalized given that north is always pointing upwards
     if direction == "W":
         return (row, col - 1)
     elif direction == "S":
@@ -151,8 +171,24 @@ def next_location(direction, row, col):
 
 
 def choose_direction(row, col):
+    """
+    Function: Choose Coordiantes
+
+    Description: This function is a helper function that determines all the possible
+                 orthogonal coordiantes that can be visited from the current coordinate,
+                 given that the orthogonal coordinate has not already been visited before
+
+    Inputs: Current coordinate
+    Outputs: Directions of next coordinate.
+    """
+    # Initally, all 4 cardinal directions are possible spots for the next
+    # coodinate, so initialize a list containing all four possible
+    # directions
     possible_directions = ["N", "E", "S", "W"]
     
+    # Much like the next_location function, we look at all the coordinates
+    # that exist and if that coordinate is not valid or has already been
+    # visited, remove it
     if row + 1 >= board_util.boardSize or (row + 1, col) in USED_COORDS:
         possible_directions.remove("S")
     
@@ -164,7 +200,8 @@ def choose_direction(row, col):
     
     if col - 1 < 0 or (row, col - 1) in USED_COORDS:
         possible_directions.remove("W")
-        
+
+    # Return the possible directions as list back to the calling function
     return possible_directions
         
     
