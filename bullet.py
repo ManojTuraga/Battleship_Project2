@@ -1,8 +1,40 @@
-#this is the implementation of the bullet class for our custom bullets
-#we need random and the main functions
+'''
+Module: bullet.py
+Creation Date: September 25th, 2024
+Author: Henry Marshall
+Contributors: Team 19 Devs, Henry Marshall, Ceres Botkin
+
+Description:
+    This module contains all the information and logic for the
+    special bullets addition to this project.
+
+Inputs:
+    None
+Outputs:
+    None
+
+Sources:
+'''
+###############################################################################
+# Imports
+###############################################################################
 import random
 
+###############################################################################
+# Procedures
+###############################################################################
 def checkHitOrMiss(board, row, col): #checks if an attack is a hit or miss
+    """
+    Function: Check Hit or Miss
+
+    Description: This function is a function that checks to see if a particular coordinate
+                 was a hit or miss on the board. updates the board accordingly 
+
+    Inputs: the game's board (not used at the moment) 
+    Outputs: None
+
+    Sources: Team 19 Devs
+    """
     if board[row][col].startswith("S"): #hit detected
         shipId = board[row][col] #get ship ID
         board[row][col] = "X" #mark hit
