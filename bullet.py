@@ -1,7 +1,6 @@
 #this is the implementation of the bullet class for our custom bullets
 #we need random and the main functions
 import random
-from battleship import *
 
 def checkHitOrMiss(board, row, col): #checks if an attack is a hit or miss
     if board[row][col].startswith("S"): #hit detected
@@ -127,10 +126,10 @@ class Bullet:
                             if ship_id not in hit_ids.keys():
                                 hit_ids[ ship_id ] = []
 
-                            hit_ids[ ship_id ].append( ( cur_x, cur_y  ) )
+                            hit_ids[ ship_id ].append( ( cur_y , cur_x  ) )
                             
                         opponentShips[ship_id] -= 1 
-                        knowledge_board[cur_x][cur_y] = "X" #mark hit on tracking board
+                        knowledge_board[cur_y][cur_x] = "X" #mark hit on tracking board
                         if opponentShips[ship_id] == 0: #if ship sunk
                             got_sink = True
                             if ship_id not in sink_ids:
@@ -146,7 +145,7 @@ class Bullet:
                     #also, count as a "hit" for the AI
                     if "~" != enemy_board[cur_y][cur_x]:
                         got_hit = True
-                        knowledge_board[cur_y][cur_x] = enemy_board[cur_y][cur_x][:].replace("O", "~")
+                        knowledge_board[cur_y][cur_x] = enemy_board[cur_y][cur_x][ : ]
                         
         return enemy_board, knowledge_board, opponentShips, got_hit, got_sink, hit_ids, sink_ids
         

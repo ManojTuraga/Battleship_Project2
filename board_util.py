@@ -1,6 +1,7 @@
 import os
 import platform
 import ai
+import events
 
 # Define a variable to store the size of the board
 boardSize = 10
@@ -84,20 +85,30 @@ def placeShipOnBoard(board, size, shipId, ai_player=False): #places a ship on th
             col, row = getCoordinatesInput() #get coordinates
             orientation = input("Enter H (Horizontal) or V (Vertical): ").strip().upper()#get orientation
         
-        base = col
-        row_func = lambda inc: row
-        col_func = lambda inc : col + inc
+        base = None
+        row_func = None
+        col_func = None
         
-        if orientation == "V":
+        if orientation == "H":
+            base = col
+            row_func = lambda inc: row
+            col_func = lambda inc : col + inc
+
+        elif orientation == "V":
             base = row
             row_func = lambda inc: row + inc
             col_func = lambda inc : col
+
+        else:
+            if not ai_player: print("Invalid orientation. Try again.") #if orientation is invalid
+            continue
 
         if base + size > boardSize or any(board[row_func( i )][col_func( i )] != '~' for i in range(size)): #check fit and availability
             if not ai_player: 
                 print("Invalid placement. Try again.") #invalid placement message
                 continue #continue asking
 
+        else:
             for i in range(size): #loop through board
                 if not ai_player:  ai.OPPONENT_LOCATION.append((row_func( i ), col_func( i )))
                 board[row_func( i )][col_func( i )] = shipId #place ship
@@ -105,16 +116,15 @@ def placeShipOnBoard(board, size, shipId, ai_player=False): #places a ship on th
             print("\nCurrent board:")# show board
             printBoard(board) #print the board
             break
-
-        else:
-            if not ai_player: print("Invalid orientation. Try again.") #if orientation is invalid
+            
 
 
 def placeShips(board, shipSizes, ai_player=False): #places multiple ships on the board
-    print("\nCurrent board:")
-    printBoard(board) # Print the empty board before placing ships
     for i, size in enumerate(shipSizes): #loop through ships
+        print("\nCurrent board:")
+        printBoard(board) # Print the empty board before placing ships
         placeShipOnBoard(board, size, f"S{i+1}", ai_player) #place each ship
+        events.clear_terminal()
 
 
 def allShipsSunk(shipHits): #checks if all ships are sunk
