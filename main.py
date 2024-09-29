@@ -254,9 +254,11 @@ def make_attack( params ):
                     if opponent_board[ row ][ col ] == "X":
                         if ( row, col ) in ai.OPPONENT_LOCATION:
                             ai.OPPONENT_LOCATION.remove( ( row, col ) )
+                            ai.USED_COORDS.add( ( row, col ) )
 
                         if ( row, col ) in ai.STACK:
                             ai.STACK.remove( ( row, col ) )
+                            ai.USED_COORDS.add( ( row, col ) )
     
         if got_sink: #if ship sunk
             if ai_player:
@@ -439,6 +441,11 @@ def main():
             is_input_invalid = True
 
         else:
+            ai.STACK.clear()
+            ai.USED_COORDS = set()
+            ai.OPPONENT_LOCATION.clear()
+            ai.SHIP_HIT = False
+            
             if choice.lower() == 'n':
                 events.display_messages( [ "Thanks for playing!" ], False )
                 break
