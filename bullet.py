@@ -2,7 +2,7 @@
 Module: bullet.py
 Creation Date: September 25th, 2024
 Author: Henry Marshall
-Contributors: Team 19 Devs, Henry Marshall, Ceres Botkin
+Contributors: Henry Marshall, Ceres Botkin
 
 Description:
     This module contains all the information and logic for the
