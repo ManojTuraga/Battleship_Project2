@@ -1,3 +1,25 @@
+'''
+Module: main.py
+Creation Date: September 25th, 2024
+Author: Manoj Turaga
+Contributors: Team 19 Devs, Manoj Turaga, Connor Forristal, Henry Marshall,
+              Ceres Botkin, Clare Channel
+
+Description:
+    This is the main launching point of the battleship game
+
+Inputs:
+    User Inputs
+Outputs:
+    Transformations on the console state
+
+Sources: W3Schools
+'''
+
+# NOTE: We note that the use of eval() was derived from logic in W3Schools.
+# We are listing it here so that we don't have to say it every single time we
+# use it
+
 ###############################################################################
 # Imports
 ###############################################################################
@@ -14,11 +36,37 @@ import random
 # Procedures
 ###############################################################################
 def random_bullet():
-    selected_bullet = bullet.all_special_bullet_list[ random.randint( 0, len( bullet.all_special_bullet_list) - 1 ) ]
+    """
+    Function: Random Bullet
 
+    Description: This function is helper that returns a list of n random bullets
+                 back to the calling entity
+
+    Inputs: None
+    Outputs: None
+
+    Sources: Team 19 Devs
+    """
+    # Generate a random list of special bullets based on all tihe special bullets
+    # that are supported and return the list to the calling entity
+    selected_bullet = bullet.all_special_bullet_list[ random.randint( 0, len( bullet.all_special_bullet_list) - 1 ) ]
     return selected_bullet
 
 def display_bullet_info( params ):
+    """
+    Function: Random Bullet
+
+    Description: This function is a helper function that displays information
+                 about the bullets to the console, whether it be all the bullets
+                 or just the bullets in a players magazine
+
+    Inputs: Player Magazine, should clear terminal, is it the opponent, trigger a wait
+    Outputs: None
+
+    Sources: Team 19 Devs
+    """
+    # Get the visuals, magazine, and whether the terminal should be cleared
+    # from the parameters dictionary
     visuals_ = params[ "visuals" ]
     magazine = params[ "magazine" ]
     should_clear_terminal = params[ "should_clear_terminal" ]
@@ -26,20 +74,27 @@ def display_bullet_info( params ):
     is_opp = None
     wait_for_confirmation = False
 
+    # If there is wait for confirmation parameter
+    # Get it from the parameters
     if "wait" in params.keys():
         wait_for_confirmation = params[ "wait" ]
 
+    # If there is an is_opp flag in the parameters, get it
     if "is_opp" in params.keys():
         is_opp = params[ "is_opp" ]
 
+    # Clear the terminal when necessary
     if should_clear_terminal:
         events.clear_terminal()
 
+    # If the magazine is None, we will just print out all the
+    # information surrounding all the possible bullets
     if magazine == None:
         visuals_.display_bullet_types()
         visuals_.display_hit_pattern_info()
 
     else:
+        # Print whether the magazine is your magazine or the opponent's magazine
         if is_opp is not None:
             if is_opp:
                 print( f"The following are the opponent's bullets:" )
@@ -48,16 +103,20 @@ def display_bullet_info( params ):
 
             print()
 
+        # If the magainze is empty, indicate that there are no bullets
+        # in the magazine
         if magazine == []:
             events.display_messages( [ "(None.)" ], False )
-            print("(None.)")
 
         else:
+            # For every bullet in the magainze, print the information
+            # about the  bullet to the console
             for i in range(len(magazine)):
                 print( f"Bullet {i}:" )
                 visuals_.display_bullet(bullet_in=magazine[i])
                 print()
 
+    # If a wait for confirmation is needed, trigger a wait
     if wait_for_confirmation:
         events.trigger_player_selection( None, [], "Press enter to continue:", False, False )
 
@@ -259,6 +318,12 @@ def make_attack( params ):
                         if ( row, col ) in ai.STACK:
                             ai.STACK.remove( ( row, col ) )
                             ai.USED_COORDS.add( ( row, col ) )
+
+                    else:
+                        ai.STACK.append( ( row, col ) )
+
+                    if len( ai.STACK ) == 0:
+                        ai.SHIP_HIT = False
     
         if got_sink: #if ship sunk
             if ai_player:
@@ -451,5 +516,7 @@ def main():
                 break
 
 
+# Only call the main function if this module
+# is being called directly
 if __name__ == "__main__":
     main()

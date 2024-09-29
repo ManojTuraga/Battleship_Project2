@@ -1,5 +1,5 @@
 '''
-Module: events.py
+Module: visuals.py
 Creation Date: September 25th, 2024
 Author: Clare Channel
 Contributors: Clare Channel, Manoj Turaga
@@ -16,7 +16,6 @@ Outputs:
 
 Sources:
 '''
-
 ###############################################################################
 # Imports
 ###############################################################################
